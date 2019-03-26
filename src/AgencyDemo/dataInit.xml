@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<countries>
+    <country discriminator="LOW_TEMPERATURE">
+        <countryName>RUSSIA</countryName>
+        <telephoneCode>+7</telephoneCode>
+        <polarNight>NO</polarNight>
+        <language>russian</language>
+        <capital>MOSCOW</capital>
+        <cities>
+            <city>
+                <name>Moscow</name>
+                <population>50000000</population>
+                <isCapital>Yes</isCapital>
+            </city>
+            <city>
+                <name>ST PETERSBURG</name>
+                <population>35000000</population>
+                <isCapital>No</isCapital>
+            </city>
+            <city>
+                <name>CHEREPOVETC</name>
+                <population>300000</population>
+                <isCapital>No</isCapital>
+            </city>
+        </cities>
+    </country>
+    <country discriminator="LOW_TEMPERATURE">
+        <countryName>ENGLAND</countryName>
+        <telephoneCode>+44</telephoneCode>
+        <polarNight>YES</polarNight>
+        <language>ENGLISH</language>
+        <capital>LONDON</capital>
+        <cities>
+            <city>
+                <name>LONDON</name>
+                <population>8005000</population>
+                <isCapital>Yes</isCapital>
+            </city>
+            <city>
+                <name>BIRMINGHAM</name>
+                <population>1005000</population>
+                <isCapital>No</isCapital>
+            </city>
+            <city>
+                <name>SHEFFIELD</name>
+                <population>551800</population>
+                <isCapital>No</isCapital>
+            </city>
+        </cities>
+    </country>
+    <country discriminator="HIGH_TEMPERATURE">
+        <countryName>USA</countryName>
+        <language>english</language>
+        <hottestMonth>JUNE</hottestMonth>
+        <averageTemperature>+23</averageTemperature>
+        <capital>WASHINGTON DC</capital>
+        <cities>
+            <city>
+                <name>NEW-YORK</name>
+                <population>44000000</population>
+                <isCapital>No</isCapital>
+            </city>
+            <city>
+                <name>WASHINGTON D.C.</name>
+                <population>80000000</population>
+                <isCapital>Yes</isCapital>
+            </city>
+            <city>
+                <name>CALIFORNIA</name>
+                <population>4000000</population>
+                <isCapital>No</isCapital>
+            </city>
+        </cities>
+    </country>
+</countries>

@@ -8,6 +8,7 @@ import homework.Storage.SequenceGenerator;
 
 import java.util.*;
 
+import static homework.Storage.Storage.countriesList;
 import static homework.Storage.Storage.orders;
 import static homework.Storage.Storage.ordersList;
 
@@ -28,7 +29,7 @@ public class OrderListMemoryRepo implements OrderRepo {
     }
 
     @Override
-    public Order findById(Long id) {
+    public Optional<Order> findById(Long id) {
         return findOrderById(id);
 
     }
@@ -86,10 +87,6 @@ public class OrderListMemoryRepo implements OrderRepo {
 
     @Override
     public List<Order> search(OrderSearchCondition orderSearchCondition) {
-        if (orderSearchCondition.getId() != null) {
-            return Collections.singletonList(findById(orderSearchCondition.getId()));
-
-        } else {
 
             boolean searchByPrice = StringUtils.isNotBlank(orderSearchCondition.getPrice());
 
@@ -126,11 +123,11 @@ public class OrderListMemoryRepo implements OrderRepo {
             }
             return foundedOrders;
         }
-    }
+
 
     @Override
     public void deleteById(Long id) {
-        Order order = findOrderById(id);
+        Optional<Order> order = findOrderById(id);
         if (order != null) {
             ordersList.remove(order);
         }
@@ -144,13 +141,10 @@ public class OrderListMemoryRepo implements OrderRepo {
         }
     }
 
-    public Order findOrderById(long id) {
-        for (Order order : ordersList) {
-            if (Long.valueOf(id).equals(order.getId())) {
-                return order;
-            }
-        }
-        return null;
+    public Optional<Order> findOrderById(long id) {
+
+        return ordersList.stream().filter(country -> Long.valueOf(id).equals(country.getId())).findAny();
+
 
     }
 

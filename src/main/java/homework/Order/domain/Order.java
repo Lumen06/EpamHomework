@@ -27,9 +27,6 @@ public class Order extends BaseDomain {
         this.cities = cities;
     }
 
-    public Long getId() {
-        return id;
-    }
 
     public String getPrice() {
         return price;

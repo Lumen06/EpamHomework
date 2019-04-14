@@ -6,10 +6,12 @@ import homework.City.search.CitySearchCondition;
 import homework.Common.Business.Search.Paginator;
 import homework.Common.Solutions.Utils.Utils.ArrayUtils;
 import homework.Common.Solutions.Utils.Utils.CollectionUtils;
+import homework.Common.Solutions.Utils.Utils.OptionalUtils;
 import homework.Common.Solutions.Utils.Utils.StringUtils;
 import homework.Storage.SequenceGenerator;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static homework.Storage.Storage.cities;
 
@@ -34,13 +36,9 @@ public class CityArrayMemoryRepo implements CityRepo {
     }
 
     @Override
-    public City findById(Long id) {
-        Integer index = findCityByIndex(id);
-        if (index != null) {
-            return cities[index];
-        }
+    public Optional<City> findById(Long id) {
 
-        return null;
+        return findCityByIndex(id).map(x -> cities[x]);
     }
 
     @Override
@@ -51,87 +49,79 @@ public class CityArrayMemoryRepo implements CityRepo {
     @Override
     public List<City> search(CitySearchCondition citySearchCondition) {
 
-        if (citySearchCondition.getId() != null) {
-            return Collections.singletonList(findById(citySearchCondition.getId()));
+        boolean searchByName = StringUtils.isNotBlank(citySearchCondition.getName());
+
+        boolean searchByPopulation = StringUtils.isNotBlank(citySearchCondition.getPopulation() + "");
+
+        boolean searchByCapital = StringUtils.isNotBlank(citySearchCondition.isCapital() + "");
+
+        int resultIndex = 0;
+
+        City[] newArrOfCities = new City[cities.length];
+
+        for (City city : cities) {
+
+            boolean found = true;
+
+            if (searchByName) {
+                found = citySearchCondition.getName().equals(city.getName());
+            }
+            if (found && searchByPopulation) {
+                found = citySearchCondition.getPopulation() == city.getPopulation();
+            }
+            if (found && searchByCapital) {
+                found = citySearchCondition.isCapital() == city.isCapital();
+            }
+            if (found) {
+                newArrOfCities[resultIndex] = city;
+                resultIndex++;
+            }
+        }
+        if (resultIndex > 0) {
+            City[] allFoundedCities = new City[resultIndex];
+            System.arraycopy(newArrOfCities, 0, allFoundedCities, 0, resultIndex);
+            List<City> resultListOfCities = new ArrayList<>(Arrays.asList(allFoundedCities));
+
+            if (!resultListOfCities.isEmpty() && citySearchCondition.shouldPaginate()) {
+                return getPageableData(resultListOfCities, citySearchCondition.getPaginator());
+            }
+
+            if (resultListOfCities.size() > 0 && citySearchCondition.needSorting()) {
+                citySortingComponent.sorting(resultListOfCities, citySearchCondition);
+            }
+            return resultListOfCities;
 
         } else {
-
-            boolean searchByName = StringUtils.isNotBlank(citySearchCondition.getName());
-
-            boolean searchByPopulation = StringUtils.isNotBlank(citySearchCondition.getPopulation() + "");
-
-            boolean searchByCapital = StringUtils.isNotBlank(citySearchCondition.isCapital() + "");
-
-            int resultIndex = 0;
-
-            City[] newArrOfCities = new City[cities.length];
-
-            for (City city : cities) {
-
-                boolean found = true;
-
-                if (searchByName) {
-                    found = citySearchCondition.getName().equals(city.getName());
-                }
-                if (found && searchByPopulation) {
-                    found = citySearchCondition.getPopulation() == city.getPopulation();
-                }
-                if (found && searchByCapital) {
-                    found = citySearchCondition.isCapital() == city.isCapital();
-                }
-                if (found) {
-                    newArrOfCities[resultIndex] = city;
-                    resultIndex++;
-                }
-            }
-            if (resultIndex > 0) {
-                City[] allFoundedCities = new City[resultIndex];
-                System.arraycopy(newArrOfCities, 0, allFoundedCities, 0, resultIndex);
-                List<City> resultListOfCities = new ArrayList<>(Arrays.asList(allFoundedCities));
-
-                if (!resultListOfCities.isEmpty() && citySearchCondition.shouldPaginate()) {
-                    return getPageableData(resultListOfCities, citySearchCondition.getPaginator());
-                }
-
-                if (resultListOfCities.size() > 0 && citySearchCondition.needSorting()) {
-                    citySortingComponent.sorting(resultListOfCities, citySearchCondition);
-                }
-                return resultListOfCities;
-
-            } else {
-                return Collections.emptyList();
-            }
+            return Collections.emptyList();
         }
     }
 
+
+
+
     @Override
     public void insert(Collection<City> items) {
+        items.forEach(this::add);
 
     }
 
     @Override
     public void deleteById(Long id) {
-        Integer index = findCityByIndex(id);
-        if (index != null) {
-            deleteCityByIndex(index);
-        }
+        findCityByIndex(id).ifPresent(this::deleteCityByIndex);
     }
 
     @Override
     public void printAll() {
-        for (City city : cities) {
-            System.out.println(city);
-        }
+        Arrays.stream(cities).filter(Objects::nonNull).forEach(System.out::println);
     }
 
 
-    private Integer findCityByIndex(Long index) {
-        for (int i = 0; i < cities.length; i++) {
-            if (cities[i].getId().equals(index)) {
-                return i;
-            }
-        }
-        return null;
+    private Optional<Integer> findCityByIndex(long index) {
+        OptionalInt optionalInt = IntStream.range(0, cities.length).filter(i ->
+                cities[i] != null && Long.valueOf(index).equals(cities[i].getId())
+        ).findAny();
+
+        return OptionalUtils.valueOf(optionalInt);
 
     }
 
@@ -158,3 +148,4 @@ public class CityArrayMemoryRepo implements CityRepo {
         return new ArrayList<>(Arrays.asList(cities));
     }
 }
+

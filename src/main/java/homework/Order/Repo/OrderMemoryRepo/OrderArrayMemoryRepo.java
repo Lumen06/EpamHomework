@@ -1,6 +1,7 @@
 package homework.Order.Repo.OrderMemoryRepo;
 
 import homework.Common.Solutions.Utils.Utils.ArrayUtils;
+import homework.Common.Solutions.Utils.Utils.OptionalUtils;
 import homework.Common.Solutions.Utils.Utils.StringUtils;
 import homework.Country.domain.BaseCountry.Country;
 import homework.Order.Repo.OrderRepo.OrderRepo;
@@ -9,6 +10,7 @@ import homework.Order.search.OrderSearchCondition;
 import homework.Storage.SequenceGenerator;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static homework.Storage.Storage.countries;
 import static homework.Storage.Storage.orders;
@@ -42,13 +44,8 @@ public class OrderArrayMemoryRepo implements OrderRepo {
     }
 
     @Override
-    public Order findById(Long id) {
-        Integer index = findOrderByIndex(id);
-        if (index != null) {
-            return orders[index];
-        }
-
-        return null;
+    public Optional<Order> findById(Long id) {
+        return findOrderByIndex(id).map(x -> orders[x]);
     }
 
     @Override
@@ -72,10 +69,6 @@ public class OrderArrayMemoryRepo implements OrderRepo {
 
     @Override
     public List<Order> search(OrderSearchCondition orderSearchCondition) {
-        if (orderSearchCondition.getId() != null) {
-            return Collections.singletonList(findById(orderSearchCondition.getId()));
-
-        } else {
 
             boolean searchByPrice = StringUtils.isNotBlank(orderSearchCondition.getPrice());
 
@@ -122,7 +115,7 @@ public class OrderArrayMemoryRepo implements OrderRepo {
                 return Collections.emptyList();
             }
         }
-    }
+
 
     @Override
     public int countByCountry(long countryId) {
@@ -164,8 +157,8 @@ public class OrderArrayMemoryRepo implements OrderRepo {
 
     @Override
     public void deleteById(Long id) {
-        Integer index = findOrderByIndex(id);
-        deleteOrderByIndex(index);
+        findOrderByIndex(id).ifPresent(this::deleteOrderByIndex);
+
     }
 
     @Override
@@ -176,14 +169,12 @@ public class OrderArrayMemoryRepo implements OrderRepo {
         }
     }
 
-    public Integer findOrderByIndex(Long index) {
-        for (int i = 0; i < orders.length; i++) {
-            if (orders[i].getId().equals(index)) {
-                return i;
-            }
-        }
-        return null;
+    public Optional<Integer> findOrderByIndex(Long index) {
+        OptionalInt optionalInt = IntStream.range(0, orders.length).filter(i ->
+                orders[i] != null && Long.valueOf(index).equals(orders[i].getId())
+        ).findAny();
 
+        return OptionalUtils.valueOf(optionalInt);
     }
 
 

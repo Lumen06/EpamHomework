@@ -8,10 +8,7 @@ import homework.Common.Solutions.Utils.Utils.CollectionUtils;
 import homework.Common.Solutions.Utils.Utils.StringUtils;
 import homework.Storage.SequenceGenerator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static homework.Storage.Storage.cities;
 import static homework.Storage.Storage.citiesList;
@@ -32,20 +29,13 @@ public class CityListMemoryRepo implements CityRepo {
     }
 
     @Override
-    public City findById(Long id) {
+    public Optional<City> findById(Long id) {
         return findCityById(id);
     }
 
     @Override
     public List<City> search(CitySearchCondition citySearchCondition) {
 
-
-        if (citySearchCondition.getId() != null)
-            return Collections.singletonList(findById(citySearchCondition.getId()));
-        if (citySearchCondition.getId() != null) {
-            return Collections.singletonList(findById(citySearchCondition.getId()));
-
-        } else {
 
             boolean searchByName = StringUtils.isNotBlank(citySearchCondition.getName());
 
@@ -82,7 +72,7 @@ public class CityListMemoryRepo implements CityRepo {
             return foundedCities;
 
         }
-    }
+
 
     private List <City> getPageableData(List<City> cities, Paginator paginator) {
         return CollectionUtils.getPageableData(cities, paginator.getLimit(), paginator.getOffset());
@@ -95,7 +85,7 @@ public class CityListMemoryRepo implements CityRepo {
 
     @Override
     public void deleteById(Long id) {
-        City city = findCityById(id);
+        Optional<City> city = findCityById(id);
         if (city != null) {
             citiesList.remove(city);
         }
@@ -110,14 +100,9 @@ public class CityListMemoryRepo implements CityRepo {
     }
 
 
-    private City findCityById(long index) {
+    private Optional<City> findCityById(long index) {
 
-        for (City city : cities) {
-            if (Long.valueOf(index).equals(city.getId())) {
-                return city;
-            }
-        }
-        return null;
+        return citiesList.stream().filter(city -> Long.valueOf(index).equals(city.getId())).findAny();
     }
 
     @Override

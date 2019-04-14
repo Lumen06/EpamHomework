@@ -1,6 +1,7 @@
 package homework.User.Repo.impl;
 
 import homework.Common.Solutions.Utils.Utils.ArrayUtils;
+import homework.Common.Solutions.Utils.Utils.OptionalUtils;
 import homework.Common.Solutions.Utils.Utils.StringUtils;
 import homework.Passport.Repo.impl.PassportArrayMemoryRepo;
 import homework.Storage.SequenceGenerator;
@@ -9,7 +10,9 @@ import homework.User.domain.User;
 import homework.User.search.UserSearchCondition;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
+import static homework.Storage.Storage.countries;
 import static homework.Storage.Storage.users;
 
 public class UserArrayMemoryRepo implements UserRepo {
@@ -38,22 +41,14 @@ public class UserArrayMemoryRepo implements UserRepo {
     }
 
     @Override
-    public User findById(Long id) {
-        Integer index = findUserByIndex(id);
-        if (index != null) {
-            return users[index];
-        }
+    public Optional<User> findById(Long id) {
+        return findUserByIndex(id).map(x -> users[x]);
 
-        return null;
     }
 
     @Override
     public List<User> search(UserSearchCondition userSearchCondition) {
-        {
-            if (userSearchCondition.getId() != null) {
-                return Collections.singletonList(findById(userSearchCondition.getId()));
 
-            } else {
 
                 boolean searchByName = StringUtils.isNotBlank(userSearchCondition.getName());
 
@@ -102,8 +97,8 @@ public class UserArrayMemoryRepo implements UserRepo {
                     return Collections.emptyList();
                 }
             }
-        }
-    }
+
+
 
 
     @Override
@@ -114,8 +109,8 @@ public class UserArrayMemoryRepo implements UserRepo {
 
     @Override
     public void deleteById(Long id) {
-        Integer index = findUserByIndex(id);
-        deleteUserByIndex(index);
+        findUserByIndex(id).ifPresent(this::deleteUserByIndex);
+
     }
 
     @Override
@@ -126,13 +121,12 @@ public class UserArrayMemoryRepo implements UserRepo {
     }
 
 
-    public Integer findUserByIndex(long index) {
-        for (int i = 0; i < users.length; i++) {
-            if (users[i].getId().equals(index)) {
-                return i;
-            }
-        }
-        return null;
+    public Optional<Integer> findUserByIndex(long index) {
+        OptionalInt optionalInt = IntStream.range(0, countries.length).filter(i ->
+                countries[i] != null && Long.valueOf(index).equals(countries[i].getId())
+        ).findAny();
+
+        return OptionalUtils.valueOf(optionalInt);
 
     }
 

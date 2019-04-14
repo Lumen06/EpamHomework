@@ -13,10 +13,7 @@ import homework.Country.search.CountrySearchCondition;
 import homework.Country.search.HotCountrySearchCondition;
 import homework.Storage.SequenceGenerator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static homework.Storage.Storage.countries;
 import static homework.Storage.Storage.countriesList;
@@ -38,17 +35,14 @@ public class CountryListMemoryRepo implements CountryRepo {
     }
 
     @Override
-    public Country findById(Long id) {
+    public Optional<Country> findById(Long id) {
         return findCountryById(id);
 
     }
 
     @Override
     public List<? extends Country> search(CountrySearchCondition countrySearchCondition) {
-        if (countrySearchCondition.getId() != null) {
-            return Collections.singletonList(findById(countrySearchCondition.getId()));
 
-        } else {
 
             boolean searchByName = StringUtils.isNotBlank(countrySearchCondition.getCountryName());
 
@@ -85,9 +79,9 @@ public class CountryListMemoryRepo implements CountryRepo {
 
             return foundedCountries;
         }
-    }
 
-    private List<ColdCountry> searchTruckModels(ColdCountrySearchCondition searchCondition) {
+
+    private List<ColdCountry> searchColdCountries(ColdCountrySearchCondition searchCondition) {
         List<ColdCountry> result = new ArrayList<>();
 
         for (Country country : countriesList) {
@@ -113,7 +107,7 @@ public class CountryListMemoryRepo implements CountryRepo {
 
         return result;
     }
-    private List<HotCountry> searchTruckModels(HotCountrySearchCondition searchCondition) {
+    private List<HotCountry> searchHotCountries(HotCountrySearchCondition searchCondition) {
         List<HotCountry> result = new ArrayList<>();
 
         for (Country country : countriesList) {
@@ -151,7 +145,7 @@ public class CountryListMemoryRepo implements CountryRepo {
 
     @Override
     public void deleteById(Long id) {
-        Country country = findCountryById(id);
+        Optional<Country> country = findCountryById(id);
         if (country != null) {
             countriesList.remove(country);
         }
@@ -166,13 +160,8 @@ public class CountryListMemoryRepo implements CountryRepo {
     }
 
 
-    public Country findCountryById(long id) {
-        for (Country country : countries) {
-            if (Long.valueOf(id).equals(country.getId())) {
-                return country;
-            }
-        }
-        return null;
+    private Optional<Country> findCountryById(long id) {
+        return countriesList.stream().filter(country -> Long.valueOf(id).equals(country.getId())).findAny();
 
     }
 

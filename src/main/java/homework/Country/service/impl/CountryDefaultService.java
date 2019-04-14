@@ -34,7 +34,7 @@ public class CountryDefaultService implements CountryService {
 
     @Override
     public void insert(Collection<Country> items) {
-
+        countryRepo.insert(items);
     }
 
     @Override

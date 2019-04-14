@@ -6,14 +6,12 @@ import homework.Passport.domain.Passport;
 import homework.Passport.search.PassportSearchCondition;
 import homework.Storage.SequenceGenerator;
 
+import static homework.Storage.Storage.countriesList;
 import static homework.Storage.Storage.passports;
 import static homework.Storage.Storage.passportsList;
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class PassportListMemoryRepo implements PassportRepo {
 
@@ -27,7 +25,7 @@ public class PassportListMemoryRepo implements PassportRepo {
     }
 
     @Override
-    public Passport findById(Long id) {
+    public Optional<Passport> findById(Long id) {
         return findPassportById(id);
 
     }
@@ -39,12 +37,7 @@ public class PassportListMemoryRepo implements PassportRepo {
 
     @Override
     public List<Passport> search(PassportSearchCondition passportSearchCondition) {
-        {
-            {
-                if (passportSearchCondition.getId() != null) {
-                    return Collections.singletonList(findById(passportSearchCondition.getId()));
 
-                } else {
 
                     boolean searchBySerial = StringUtils.isNotBlank(passportSearchCondition.getSerial() + "");
 
@@ -73,15 +66,14 @@ public class PassportListMemoryRepo implements PassportRepo {
 
                     return foundedPassports;
                 }
-            }
-        }
-    }
+
+
 
     @Override
     public void deleteById(Long id) {
-        Passport Passport = findPassportById(id);
-        if (Passport != null) {
-            passportsList.remove(Passport);
+        Optional<Passport> passport = findPassportById(id);
+        if (passport != null) {
+            passportsList.remove(passport);
         }
     }
 
@@ -93,13 +85,9 @@ public class PassportListMemoryRepo implements PassportRepo {
         }
     }
 
-    public Passport findPassportById(long id) {
-        for (Passport Passport : passportsList) {
-            if (Long.valueOf(id).equals(Passport.getId())) {
-                return Passport;
-            }
-        }
-        return null;
+    public Optional<Passport> findPassportById(long id) {
+
+        return passportsList.stream().filter(passport -> Long.valueOf(id).equals(passport.getId())).findAny();
 
     }
 

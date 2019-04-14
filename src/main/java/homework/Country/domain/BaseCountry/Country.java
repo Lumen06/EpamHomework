@@ -17,16 +17,8 @@ public abstract class Country extends BaseDomain {
         return capital;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setCapital(City capital) {
         this.capital = capital;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getCountryName() {

@@ -6,11 +6,9 @@ import homework.User.domain.User;
 import homework.User.search.UserSearchCondition;
 import homework.User.Repo.UserRepo.UserRepo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import static homework.Storage.Storage.countriesList;
 import static homework.Storage.Storage.users;
 import static homework.Storage.Storage.usersList;
 
@@ -31,7 +29,7 @@ public class UserListMemoryRepo implements UserRepo {
     }
 
     @Override
-    public User findById(Long id) {
+    public Optional<User> findById(Long id) {
         return findUserById(id);
 
     }
@@ -43,11 +41,7 @@ public class UserListMemoryRepo implements UserRepo {
 
     @Override
     public List<User> search(UserSearchCondition userSearchCondition) {
-        {
-            if (userSearchCondition.getId() != null) {
-                return Collections.singletonList(findById(userSearchCondition.getId()));
 
-            } else {
 
                 boolean searchByName = StringUtils.isNotBlank(userSearchCondition.getName());
 
@@ -84,12 +78,11 @@ public class UserListMemoryRepo implements UserRepo {
                 }
                 return foundedUsers;
             }
-        }
-    }
+
 
     @Override
     public void deleteById(Long id) {
-        User user = findUserById(id);
+        Optional<User> user = findUserById(id);
         if (user != null) {
             usersList.remove(user);
         }
@@ -103,13 +96,9 @@ public class UserListMemoryRepo implements UserRepo {
         }
     }
 
-    public User findUserById(long id) {
-        for (User user : usersList) {
-            if (Long.valueOf(id).equals(user.getId())) {
-                return user;
-            }
-        }
-        return null;
+    public Optional<User> findUserById(long id) {
+        return usersList.stream().filter(user -> Long.valueOf(id).equals(user.getId())).findAny();
+
     }
 
     @Override

@@ -5,7 +5,6 @@ import homework.Storage.initor.datasourcereader.CountriesAndCitiesTxtParser;
 import homework.Storage.initor.datasourcereader.sax.CountriesAndCitiesSaxParser;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public class CountryCitiesFileParser implements Runnable{
@@ -14,12 +13,12 @@ public class CountryCitiesFileParser implements Runnable{
   private Thread thread;
   private File file;
   private List<Country> countryList;
-  private volatile Exception parseEsxception;
+  private volatile Exception parseException;
 
     public CountryCitiesFileParser(StorageInitializer.DataSourceType dataSourceType, File file) {
 
         this.dataSourceType = dataSourceType;
-        thread = new Thread();
+        thread = new Thread(this);
         this.file = file;
     }
 
@@ -41,21 +40,24 @@ public class CountryCitiesFileParser implements Runnable{
             }
             catch (Exception e) {
                 e.printStackTrace();
+                parseException = e;
             }
         }
     }
+
+    public void parseTheCountries() {
+        thread.start();
+    }
+
 
     public List<Country> getCountryList() {
         return countryList;
     }
 
-    public Exception getParseEsxception() {
-        return parseEsxception;
+    public Exception getParseException() {
+        return parseException;
     }
 
-    public void asyncParseMarks() {
-        thread.start();
-    }
 
     public void blockUntilJobIsFinished() throws InterruptedException {
         thread.join();

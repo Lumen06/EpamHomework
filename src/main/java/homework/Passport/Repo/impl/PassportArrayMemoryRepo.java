@@ -1,6 +1,7 @@
 package homework.Passport.Repo.impl;
 
 import homework.Common.Solutions.Utils.Utils.ArrayUtils;
+import homework.Common.Solutions.Utils.Utils.OptionalUtils;
 import homework.Common.Solutions.Utils.Utils.StringUtils;
 import homework.Passport.Repo.PassportRepo.PassportRepo;
 import homework.Passport.domain.Passport;
@@ -8,7 +9,9 @@ import homework.Passport.search.PassportSearchCondition;
 import homework.Storage.SequenceGenerator;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
+import static homework.Storage.Storage.countries;
 import static homework.Storage.Storage.passports;
 
 
@@ -37,13 +40,9 @@ public class PassportArrayMemoryRepo implements PassportRepo {
     }
 
     @Override
-    public Passport findById(Long id) {
-        Integer index = findPassportByIndex(id);
-        if (index != null) {
-            return passports[index];
-        }
+    public Optional<Passport> findById(Long id) {
+        return findPassportByIndex(id).map(x -> passports[x]);
 
-        return null;
     }
 
     @Override
@@ -53,12 +52,7 @@ public class PassportArrayMemoryRepo implements PassportRepo {
 
     @Override
     public List<Passport> search(PassportSearchCondition passportSearchCondition) {
-        {
-            {
-                if (passportSearchCondition.getId() != null) {
-                    return Collections.singletonList(findById(passportSearchCondition.getId()));
 
-                } else {
 
                     boolean searchBySerial = StringUtils.isNotBlank(passportSearchCondition.getSerial() + "");
 
@@ -98,14 +92,13 @@ public class PassportArrayMemoryRepo implements PassportRepo {
                         return Collections.emptyList();
                     }
                 }
-            }
-        }
-    }
+
+
 
     @Override
     public void deleteById(Long id) {
-        Integer index = findPassportByIndex(id);
-        deletePassportByIndex(index);
+        findPassportByIndex(id).ifPresent(this::deletePassportByIndex);
+
     }
 
     @Override
@@ -117,13 +110,12 @@ public class PassportArrayMemoryRepo implements PassportRepo {
     }
 
 
-    public Integer findPassportByIndex(Long index) {
-        for (int i = 0; i < passports.length; i++) {
-            if (passports[i].getId().equals(index)) {
-                return i;
-            }
-        }
-        return null;
+    public Optional<Integer> findPassportByIndex(Long index) {
+        OptionalInt optionalInt = IntStream.range(0, countries.length).filter(i ->
+                countries[i] != null && Long.valueOf(index).equals(countries[i].getId())
+        ).findAny();
+
+        return OptionalUtils.valueOf(optionalInt);
     }
 
     public void deletePassportByIndex(int index) {

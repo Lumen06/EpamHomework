@@ -3,6 +3,7 @@ package homework.Country.Repo.impl;
 import homework.Common.Business.Search.Paginator;
 import homework.Common.Solutions.Utils.Utils.ArrayUtils;
 import homework.Common.Solutions.Utils.Utils.CollectionUtils;
+import homework.Common.Solutions.Utils.Utils.OptionalUtils;
 import homework.Common.Solutions.Utils.Utils.StringUtils;
 import homework.Country.Repo.CountryRepo.CountryRepo;
 import homework.Country.domain.BaseCountry.Country;
@@ -15,7 +16,9 @@ import homework.Country.search.HotCountrySearchCondition;
 import homework.Storage.SequenceGenerator;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
+import static homework.Storage.Storage.cities;
 import static homework.Storage.Storage.countries;
 import static homework.Storage.Storage.countriesList;
 
@@ -50,22 +53,16 @@ public class CountryArrayMemoryRepo implements CountryRepo {
     }
 
     @Override
-    public Country findById(Long id) {
-        Integer index = findCountryByIndex(id);
-        if (index != null) {
-            return countries[index];
-        }
+    public Optional<Country> findById(Long id) {
 
-        return null;
+        return findCountryByIndex(id).map(x -> countries[x]);
+
 
     }
 
     @Override
     public List<? extends Country> search(CountrySearchCondition countrySearchCondition) {
-        if (countrySearchCondition.getId() != null) {
-            return Collections.singletonList(findById(countrySearchCondition.getId()));
 
-        } else {
 
             boolean searchByName = StringUtils.isNotBlank(countrySearchCondition.getCountryName());
 
@@ -112,7 +109,7 @@ public class CountryArrayMemoryRepo implements CountryRepo {
                 return Collections.emptyList();
             }
         }
-    }
+
     private List<ColdCountry> searchColdCountries(ColdCountrySearchCondition searchCondition) {
         ColdCountry[] foundColdCountries = new ColdCountry[countries.length];
         int resultIndex = 0;
@@ -192,26 +189,22 @@ public class CountryArrayMemoryRepo implements CountryRepo {
 
     @Override
     public void deleteById(Long id) {
-        Integer index = findCountryByIndex(id);
-        deleteCountryByIndex(index);
+        findCountryByIndex(id).ifPresent(this::deleteCountryByIndex);
 
     }
 
     @Override
     public void printAll() {
-        for (Country country : countries) {
-            System.out.println(country);
-        }
+        Arrays.stream(cities).filter(Objects::nonNull).forEach(System.out::println);
     }
 
 
-    public Integer findCountryByIndex(Long index) {
-        for (int i = 0; i < countries.length; i++) {
-            if (countries[i].getId().equals(index)) {
-                return i;
-            }
-        }
-        return null;
+    public Optional<Integer> findCountryByIndex(Long index) {
+        OptionalInt optionalInt = IntStream.range(0, countries.length).filter(i ->
+                countries[i] != null && Long.valueOf(index).equals(countries[i].getId())
+        ).findAny();
+
+        return OptionalUtils.valueOf(optionalInt);
 
     }
 
